@@ -76,7 +76,7 @@ function RegisterScreen({ location, history }) {
           <Form.Label>Confirm Password</Form.Label>
           <Form.Control
             required
-            type='confirmPassword'
+            type='password'
             placeholder='Enter password again'
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}></Form.Control>
