@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Col, Row, ListGroup, Image, Card, Button } from 'react-bootstrap';
 
 import Message from '../components/Message';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { createOrder } from '../actions/orderActions';
+import { ORDER_CREATE_RESET } from '../constants/orderConstants';
 
-function PlaceOrderScreen() {
+function PlaceOrderScreen({ history }) {
   const cart = useSelector((state) => state.cart);
   const { cartItems, shippingAddress, paymentMethod } = cart;
+
+  const orderCreate = useSelector((state) => state.orderCreate);
+  const { order, error, success } = orderCreate;
+
+  const dispatch = useDispatch();
 
   cart.itemsPrice = cart.cartItems
     .reduce((acc, item) => acc + item.price * item.qty, 0)
@@ -24,8 +31,25 @@ function PlaceOrderScreen() {
     Number(cart.taxPrice)
   ).toFixed(2);
 
+  useEffect(() => {
+    if (success) {
+      history.push(`/order/${order._id}`);
+      dispatch({ type: ORDER_CREATE_RESET });
+    }
+  }, [success, history, dispatch, order]);
+
   const placeOrder = () => {
-    console.log('Order placed');
+    dispatch(
+      createOrder({
+        orderItems: cartItems,
+        shippingAddress: shippingAddress,
+        paymentMethod: paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        shippingPrice: cart.shippingPrice,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice,
+      })
+    );
   };
 
   return (
@@ -112,6 +136,11 @@ function PlaceOrderScreen() {
                   <Col>${cart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
+              {error && (
+                <ListGroup.Item>
+                  <Message variant='danger'>{error}</Message>
+                </ListGroup.Item>
+              )}
               <ListGroup.Item>
                 <Button
                   type='button'
