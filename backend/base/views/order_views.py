@@ -3,6 +3,7 @@ from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from django.utils import timezone
 
 from base.models import Product, Order, OrderItem, ShippingAddress
 from base.serializers import ProductSerializer, OrderSerializer
@@ -72,3 +73,26 @@ def getOrderById(request, pk):
     except:
         return Response({'detail': 'Order does not exist'},
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateOrderToPaid(request, pk):
+    order = Order.objects.get(_id=pk)
+
+    order.isPaid = True
+    order.paidAt = timezone.now()
+    order.save()
+
+    return Response('Order was paid')
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserOrders(request):
+    user = request.user
+    orders = user.order_set.all()
+
+    serializer = OrderSerializer(orders, many=True)
+
+    return Response(serializer.data)
