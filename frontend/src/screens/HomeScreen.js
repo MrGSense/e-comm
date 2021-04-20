@@ -5,6 +5,7 @@ import { Row, Col } from 'react-bootstrap';
 import Product from '../components/Product';
 import Loading from '../components/Loading';
 import Message from '../components/Message';
+import ProductCarousel from '../components/ProductCarousel';
 import { listProducts } from '../actions/productActions';
 
 function HomeScreen({ history }) {
@@ -20,6 +21,7 @@ function HomeScreen({ history }) {
 
   return (
     <div>
+      {!keyword && <ProductCarousel />}
       <h1>Latest Products</h1>
       {loading ? (
         <Loading />
@@ -32,6 +34,11 @@ function HomeScreen({ history }) {
               <Product product={product} />
             </Col>
           ))}
+          {products.length === 0 && (
+            <Message variant='info'>
+              No products match your search criteria
+            </Message>
+          )}
         </Row>
       )}
     </div>
